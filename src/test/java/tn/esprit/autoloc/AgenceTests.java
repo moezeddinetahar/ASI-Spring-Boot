@@ -4,83 +4,149 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import tn.esprit.autoloc.domain.Agence;
 import tn.esprit.autoloc.domain.CategorieVehicule;
 import tn.esprit.autoloc.domain.StatutVehicule;
 import tn.esprit.autoloc.domain.Vehicule;
+import tn.esprit.autoloc.repository.IAgenceRepository;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 public class AgenceTests {
     @Autowired
-    private AgenceRepositoryMock agenceRepository;
+    private AgenceRepositoryMock basicAgenceRepository;
 
-    @Test
-    public void addAgence(){
+    @Autowired
+    private IAgenceRepository fullAgenceRepository;
+
+
+    private void addAgence(CrudRepository<Agence , Long> repository){
+
+        int valeur = (int) System.currentTimeMillis();
+
         Agence a = new Agence();
-        a.setIdAgence(8L);
         a.setNom("Agence ariana");
         a.setAdresse("1 Rue Hedi");
         a.setVille("Tunis");
         a.setTelephone("71585874");
 
         Vehicule v1 = new Vehicule();
-        v1.setIdVehicule(12L);
         v1.setCategorie(CategorieVehicule.SUV);
-        v1.setImmatriculation("785414TU96");
+        v1.setImmatriculation("785414TU96" + valeur);
         v1.setMarque("Isuzu");
         v1.setModele("DMax");
-        v1.setStatut(StatutVehicule.MAINTENANCE);
+        v1.setStatut(StatutVehicule.EN_MAINTENANCE);
         v1.setTarifJournalier(new BigDecimal(100));
-        v1.setAgence(a); // 👈 Indispensable : lier le véhicule à l'agence
 
         Vehicule v2 = new Vehicule();
-        v2.setIdVehicule(13L);
         v2.setCategorie(CategorieVehicule.UTILITAIRE);
-        v2.setImmatriculation("785414TU95");
+        v2.setImmatriculation("785414TU95" + valeur);
         v2.setMarque("Toyota");
         v2.setModele("Yaris");
         v2.setStatut(StatutVehicule.DISPONIBLE);
         v2.setTarifJournalier(new BigDecimal(80));
-        v2.setAgence(a); // 👈 Indispensable : lier le véhicule à l'agence
 
-        // Utilisation d'un HashSet mutable au lieu de Set.of()
-        Set<Vehicule> vehicules = new HashSet<>();
-        vehicules.add(v1);
-        vehicules.add(v2);
-
-        a.setVehicules(vehicules);
-        agenceRepository.save(a);
+        a.setVehicules(Set.of(v1,v2));
+        repository.save(a);
     }
 
-    @Test
-    public void loadAgence() {
-        Iterable<Agence> agences = agenceRepository.findAll();
+    private void loadAgence(CrudRepository repository, String typeDepot) {
+        Iterable<Agence> agences = repository.findAll();
 
         StringBuilder sb = new StringBuilder();
+        sb.append("Type de dépôt utilisé : ")
+                .append(typeDepot)
+                .append("\n");
 
-        for (Agence agence : agences) {
-            sb.append(agence.getIdAgence()).append(" | ").append(agence.getNom()).append("\n");
+        for (Object obj : agences) {
+            Agence agence = (Agence) obj;
 
-            int count = (agence.getVehicules() != null) ? agence.getVehicules().size() : 0;
-            sb.append("Vehicules Count : ").append(count).append("\n");
+            sb.append(agence.getIdAgence())
+                    .append(" | ")
+                    .append(agence.getNom())
+                    .append("\n");
 
-            if (agence.getVehicules() != null) {
-                for (Vehicule v : agence.getVehicules()) {
-                    sb.append("=== ").append(v.getIdVehicule()).append("|").append(v.getImmatriculation()).append("\n");
+            Set<Vehicule> vehicules = agence.getVehicules();
+            int nb = (vehicules == null) ? 0 : vehicules.size();
+
+            sb.append("Nombre de véhicules : ")
+                    .append(nb)
+                    .append("\n");
+
+            if (vehicules != null) {
+                for (Vehicule v : vehicules) {
+                    sb.append("   ")
+                            .append(v.getIdVehicule())
+                            .append(" | ")
+                            .append(v.getImmatriculation())
+                            .append("\n");
                 }
             }
         }
 
-        org.junit.jupiter.api.Assertions.fail(sb.toString().trim());
+        System.out.println(sb);
+    }
+
+    @Test
+    public void basicAddAgence() {
+        addAgence(basicAgenceRepository);
+    }
+
+    @Test
+    public void fullAddAgence() {
+        addAgence(fullAgenceRepository);
+    }
+
+
+    @Test
+    public void basicLoadAgence() {
+        loadAgence(basicAgenceRepository, "Basic Repository Mock");
+    }
+
+    @Test
+    public void fullLoadAgence() {
+        loadAgence(fullAgenceRepository, "Full Repository");
+    }
+
+    @Test
+    public void loadSortedAgences() {
+        List<Agence> agences = fullAgenceRepository.findAll(Sort.by(Sort.Direction.DESC, "idAgence"));
+        agences.forEach(agence -> {
+            System.out.println("ID : " + agence.getIdAgence() +
+                    " | Nom : " + agence.getNom() +
+                    " | Ville : " + agence.getVille() +
+                    " | Adresse : " + agence.getAdresse());
+        });
+    }
+
+    @Test
+    public void loadPagedAgences() {
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "idAgence"));
+        Page<Agence> pageAgences = fullAgenceRepository.findAll(pageable);
+
+        System.out.println("Nombre total de pages : " + pageAgences.getTotalPages());
+        System.out.println("Page en cours : " + pageAgences.getNumber());
+
+        pageAgences.getContent().forEach(agence -> {
+            System.out.println("ID : " + agence.getIdAgence() +
+                    " | Nom : " + agence.getNom() +
+                    " | Ville : " + agence.getVille() +
+                    " | Adresse : " + agence.getAdresse());
+        });
     }
 }
 
 interface AgenceRepositoryMock extends CrudRepository<Agence, Long>{
+
 }
