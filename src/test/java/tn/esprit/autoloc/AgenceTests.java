@@ -9,17 +9,21 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import tn.esprit.autoloc.domain.Agence;
 import tn.esprit.autoloc.domain.CategorieVehicule;
 import tn.esprit.autoloc.domain.StatutVehicule;
 import tn.esprit.autoloc.domain.Vehicule;
 import tn.esprit.autoloc.repository.IAgenceRepository;
+import tn.esprit.autoloc.service.IAgenceService;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Fail.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
@@ -29,6 +33,9 @@ public class AgenceTests {
 
     @Autowired
     private IAgenceRepository fullAgenceRepository;
+
+    @Autowired
+    private IAgenceService agenceService;
 
 
     private void addAgence(CrudRepository<Agence , Long> repository){
@@ -119,34 +126,86 @@ public class AgenceTests {
         loadAgence(fullAgenceRepository, "Full Repository");
     }
 
+
     @Test
     public void loadSortedAgences() {
-        List<Agence> agences = fullAgenceRepository.findAll(Sort.by(Sort.Direction.DESC, "idAgence"));
-        agences.forEach(agence -> {
-            System.out.println("ID : " + agence.getIdAgence() +
-                    " | Nom : " + agence.getNom() +
-                    " | Ville : " + agence.getVille() +
-                    " | Adresse : " + agence.getAdresse());
-        });
+        Iterable<Agence> agences =
+                fullAgenceRepository.findAll(
+                        Sort.by(Sort.Direction.DESC, "idAgence")
+                );
+
+        for (Agence agence : agences) {
+            System.out.println("ID : " + agence.getIdAgence());
+            System.out.println("Nom : " + agence.getNom());
+            System.out.println("Adresse : " + agence.getAdresse());
+            System.out.println("Ville : " + agence.getVille());
+            System.out.println("Téléphone : " + agence.getTelephone());
+            System.out.println("-------------------------");
+        }
     }
 
     @Test
     public void loadPagedAgences() {
-        Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "idAgence"));
-        Page<Agence> pageAgences = fullAgenceRepository.findAll(pageable);
 
-        System.out.println("Nombre total de pages : " + pageAgences.getTotalPages());
-        System.out.println("Page en cours : " + pageAgences.getNumber());
+        int taillePage = 2;
 
-        pageAgences.getContent().forEach(agence -> {
-            System.out.println("ID : " + agence.getIdAgence() +
-                    " | Nom : " + agence.getNom() +
-                    " | Ville : " + agence.getVille() +
-                    " | Adresse : " + agence.getAdresse());
-        });
+        Pageable pageable = PageRequest.of(
+                0,
+                taillePage,
+                Sort.by(Sort.Direction.DESC, "idAgence")
+        );
+
+        Page<Agence> page = fullAgenceRepository.findAll(pageable);
+
+        int totalPages = page.getTotalPages();
+
+        System.out.println("Nombre total de pages : " + totalPages);
+
+        for (int i = 0; i < totalPages; i++) {
+
+            pageable = PageRequest.of(
+                    i,
+                    taillePage,
+                    Sort.by(Sort.Direction.DESC, "idAgence")
+            );
+
+            page = fullAgenceRepository.findAll(pageable);
+
+            System.out.println("\n========== Page " + (i + 1) + " ==========");
+
+            for (Agence agence : page.getContent()) {
+                System.out.println("ID : " + agence.getIdAgence());
+                System.out.println("Nom : " + agence.getNom());
+                System.out.println("Adresse : " + agence.getAdresse());
+                System.out.println("Ville : " + agence.getVille());
+                System.out.println("Téléphone : " + agence.getTelephone());
+                System.out.println("-------------------------");
+            }
+        }
+    }
+
+    @Test
+    public void createAgence() {
+
+        Agence a = new Agence();
+        a.setNom("Agence Lac");
+        a.setAdresse("5 Rue du Lac");
+        a.setVille("Tunis");
+        a.setTelephone("71123456");
+
+
+        Agence creee = agenceService.create(a);
+
+        // 3. Vérifie le résultat
+        assertNotNull("L'identifiant doit être généré", creee.getIdAgence());
+        assertEquals("Agence Lac", creee.getNom());
+        assertEquals("71123456", creee.getTelephone());
+
+        System.out.println("Agence créée avec l'ID : " + creee.getIdAgence());
     }
 }
 
+@Repository
 interface AgenceRepositoryMock extends CrudRepository<Agence, Long>{
 
 }
