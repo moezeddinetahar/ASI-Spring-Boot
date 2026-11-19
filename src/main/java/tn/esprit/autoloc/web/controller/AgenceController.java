@@ -8,8 +8,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import tn.esprit.autoloc.calcul.VehiculeOffre;
 import tn.esprit.autoloc.domain.Agence;
+import tn.esprit.autoloc.service.IAgenceEmployes;
 import tn.esprit.autoloc.service.IAgenceService;
+import tn.esprit.autoloc.service.IAgenceSimulation;
 
 import java.util.List;
 
@@ -20,6 +23,8 @@ import java.util.List;
 public class AgenceController {
 
     private final IAgenceService agenceService;
+    private final IAgenceSimulation simulation;
+    private final IAgenceEmployes agenceEmployes;
 
     @Operation(summary = "Lister les agences")
     @ApiResponse(responseCode = "200", description = "Liste des agences")
@@ -66,5 +71,18 @@ public class AgenceController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@Parameter(description = "Identifiant de l'agence") @PathVariable Long id) {
         agenceService.deleteById(id);
+    }
+
+    @GetMapping("/{agence}/simuler")
+    public String simuler(@PathVariable Agence agence,
+                          @RequestParam int jours,
+                          @RequestParam VehiculeOffre offre) {
+        return simulation.simuler(agence, jours, offre);
+    }
+
+    @Operation(summary = "Mettre à jour une agence et ajouter de nouveaux employés")
+    @PutMapping("/{id}/employes")
+    public Agence updateAvecEmployes(@PathVariable Long id, @RequestBody Agence agence) {
+        return agenceEmployes.updateAvecEmployes(id, agence);
     }
 }

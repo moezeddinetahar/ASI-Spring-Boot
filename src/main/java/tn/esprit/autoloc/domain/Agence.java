@@ -1,10 +1,11 @@
 package tn.esprit.autoloc.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -36,7 +37,23 @@ public class Agence {
     private Set<Vehicule> vehicules;
 
 
+    // WRITE_ONLY : accepté dans le JSON reçu (structure imbriquée), jamais renvoyé dans la réponse
     @OneToMany(mappedBy = "agence", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private Set<Employe> employes;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Set<Employe> employes = new HashSet<>();
+
+    // Étape 11 : champ mappé entier
+    @Column(nullable = false)
+    private int effectif;
+
+    // Étape 10 : méthodes qui gardent les deux côtés de la relation synchronisés
+    public void addEmployee(Employe employe) {
+        employes.add(employe);
+        employe.setAgence(this);      // côté propriétaire (celui qui écrit la clé étrangère)
+    }
+
+    public void removeEmployee(Employe employe) {
+        employes.remove(employe);
+        employe.setAgence(null);
+    }
 }

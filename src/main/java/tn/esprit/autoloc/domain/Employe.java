@@ -29,4 +29,15 @@ public class Employe {
     @ManyToOne
     @JoinColumn(name = "agence_id")
     private Agence agence;
+
+    // Étape 10 : affectation symétrique (le nom `steAgence` était une faute de frappe)
+    public void affecterAgence(Agence nouvelle) {
+        if (this.agence != null) {
+            this.agence.getEmployes().remove(this);   // quitte l'ancienne agence
+        }
+        this.agence = nouvelle;
+        if (nouvelle != null) {
+            nouvelle.getEmployes().add(this);
+        }
+    }
 }
