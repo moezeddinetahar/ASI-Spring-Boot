@@ -3,8 +3,6 @@ package tn.esprit.autoloc;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -32,7 +30,6 @@ import static org.springframework.test.util.AssertionErrors.assertNotNull;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 public class AgenceTests {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AgenceTests.class);
 
     @Autowired
     private AgenceRepositoryMock basicAgenceRepository;
@@ -108,7 +105,7 @@ public class AgenceTests {
             }
         }
 
-        LOGGER.info("{}", sb);
+        System.out.println(sb);
         return sb.toString();
     }
 
@@ -152,9 +149,12 @@ public class AgenceTests {
     }
 
     private void logAgence(Agence agence) {
-        LOGGER.info("ID : {} | Nom : {} | Adresse : {} | Ville : {} | Téléphone : {}",
-                agence.getIdAgence(), agence.getNom(), agence.getAdresse(),
-                agence.getVille(), agence.getTelephone());
+        System.out.println("ID : " + agence.getIdAgence());
+        System.out.println("Nom : " + agence.getNom());
+        System.out.println("Adresse : " + agence.getAdresse());
+        System.out.println("Ville : " + agence.getVille());
+        System.out.println("Téléphone : " + agence.getTelephone());
+        System.out.println("-------------------------");
     }
 
     @Test
@@ -172,7 +172,7 @@ public class AgenceTests {
 
         int totalPages = page.getTotalPages();
 
-        LOGGER.info("Nombre total de pages : {}", totalPages);
+        System.out.println("Nombre total de pages : " + totalPages);
 
         for (int i = 0; i < totalPages; i++) {
 
@@ -184,7 +184,7 @@ public class AgenceTests {
 
             page = fullAgenceRepository.findAll(pageable);
 
-            LOGGER.info("========== Page {} ==========", i + 1);
+            System.out.println("\n========== Page " + (i + 1) + " ==========");
 
             for (Agence agence : page.getContent()) {
                 logAgence(agence);
@@ -210,7 +210,7 @@ public class AgenceTests {
         assertEquals("Agence Lac", creee.getNom());
         assertEquals("71123456", creee.getTelephone());
 
-        LOGGER.info("Agence créée avec l'ID : {}", creee.getIdAgence());
+        System.out.println("Agence créée avec l'ID : " + creee.getIdAgence());
     }
 }
 

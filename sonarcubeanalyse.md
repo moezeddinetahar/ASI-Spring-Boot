@@ -13,5 +13,5 @@
 + Explicitly specify the time zone by passing a ZoneId or a Clock to the .now() method. [java:S8688]
 
 # Impact Important
-+ Replace this use of System.out by a logger. [java:S106]
++ Replace this use of System.out by a logger. [java:2]
 + Replace this persistent entity with a simple POJO or DTO object. [java:S4684]
