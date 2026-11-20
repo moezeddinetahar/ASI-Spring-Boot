@@ -12,6 +12,8 @@ import tn.esprit.autoloc.service.IVehiculeService;
 
 import java.util.List;
 
+// java:S4684 désactivée volontairement (étape 15) : les entités JPA servent de modèle d'échange
+@SuppressWarnings("java:S4684")
 @RestController
 @RequestMapping("/vehicules")
 @RequiredArgsConstructor

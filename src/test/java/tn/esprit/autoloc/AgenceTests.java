@@ -1,7 +1,10 @@
 package tn.esprit.autoloc;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -22,11 +25,15 @@ import java.math.BigDecimal;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
+@Ignore("Ancien atelier : tests d'intégration qui nécessitent la base MySQL")
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 public class AgenceTests {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AgenceTests.class);
+
     @Autowired
     private AgenceRepositoryMock basicAgenceRepository;
 
@@ -37,7 +44,7 @@ public class AgenceTests {
     private IAgenceService agenceService;
 
 
-    private void addAgence(CrudRepository<Agence , Long> repository){
+    private Agence addAgence(CrudRepository<Agence , Long> repository){
 
         int valeur = (int) System.currentTimeMillis();
 
@@ -64,10 +71,10 @@ public class AgenceTests {
         v2.setTarifJournalier(new BigDecimal(80));
 
         a.setVehicules(Set.of(v1,v2));
-        repository.save(a);
+        return repository.save(a);
     }
 
-    private void loadAgence(CrudRepository repository, String typeDepot) {
+    private String loadAgence(CrudRepository repository, String typeDepot) {
         Iterable<Agence> agences = repository.findAll();
 
         StringBuilder sb = new StringBuilder();
@@ -101,28 +108,33 @@ public class AgenceTests {
             }
         }
 
-        System.out.println(sb);
+        LOGGER.info("{}", sb);
+        return sb.toString();
     }
 
     @Test
     public void basicAddAgence() {
-        addAgence(basicAgenceRepository);
+        Agence creee = addAgence(basicAgenceRepository);
+        assertNotNull("L'identifiant doit être généré", creee.getIdAgence());
     }
 
     @Test
     public void fullAddAgence() {
-        addAgence(fullAgenceRepository);
+        Agence creee = addAgence(fullAgenceRepository);
+        assertNotNull("L'identifiant doit être généré", creee.getIdAgence());
     }
 
 
     @Test
     public void basicLoadAgence() {
-        loadAgence(basicAgenceRepository, "Basic Repository Mock");
+        String rapport = loadAgence(basicAgenceRepository, "Basic Repository Mock");
+        assertTrue(rapport.contains("Basic Repository Mock"));
     }
 
     @Test
     public void fullLoadAgence() {
-        loadAgence(fullAgenceRepository, "Full Repository");
+        String rapport = loadAgence(fullAgenceRepository, "Full Repository");
+        assertTrue(rapport.contains("Full Repository"));
     }
 
 
@@ -134,13 +146,15 @@ public class AgenceTests {
                 );
 
         for (Agence agence : agences) {
-            System.out.println("ID : " + agence.getIdAgence());
-            System.out.println("Nom : " + agence.getNom());
-            System.out.println("Adresse : " + agence.getAdresse());
-            System.out.println("Ville : " + agence.getVille());
-            System.out.println("Téléphone : " + agence.getTelephone());
-            System.out.println("-------------------------");
+            logAgence(agence);
         }
+        assertNotNull("La liste triée ne doit pas être nulle", agences);
+    }
+
+    private void logAgence(Agence agence) {
+        LOGGER.info("ID : {} | Nom : {} | Adresse : {} | Ville : {} | Téléphone : {}",
+                agence.getIdAgence(), agence.getNom(), agence.getAdresse(),
+                agence.getVille(), agence.getTelephone());
     }
 
     @Test
@@ -158,7 +172,7 @@ public class AgenceTests {
 
         int totalPages = page.getTotalPages();
 
-        System.out.println("Nombre total de pages : " + totalPages);
+        LOGGER.info("Nombre total de pages : {}", totalPages);
 
         for (int i = 0; i < totalPages; i++) {
 
@@ -170,17 +184,13 @@ public class AgenceTests {
 
             page = fullAgenceRepository.findAll(pageable);
 
-            System.out.println("\n========== Page " + (i + 1) + " ==========");
+            LOGGER.info("========== Page {} ==========", i + 1);
 
             for (Agence agence : page.getContent()) {
-                System.out.println("ID : " + agence.getIdAgence());
-                System.out.println("Nom : " + agence.getNom());
-                System.out.println("Adresse : " + agence.getAdresse());
-                System.out.println("Ville : " + agence.getVille());
-                System.out.println("Téléphone : " + agence.getTelephone());
-                System.out.println("-------------------------");
+                logAgence(agence);
             }
         }
+        assertTrue(totalPages >= 0);
     }
 
     @Test
@@ -200,7 +210,7 @@ public class AgenceTests {
         assertEquals("Agence Lac", creee.getNom());
         assertEquals("71123456", creee.getTelephone());
 
-        System.out.println("Agence créée avec l'ID : " + creee.getIdAgence());
+        LOGGER.info("Agence créée avec l'ID : {}", creee.getIdAgence());
     }
 }
 

@@ -1,16 +1,22 @@
 package tn.esprit.autoloc.web;
 
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import jakarta.servlet.http.HttpServletRequest;
 import tn.esprit.autoloc.exception.ResourceNotFoundException;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    // java:S8688 : l'heure est obtenue à partir d'une Clock (fuseau explicite)
+    private final Clock clock;
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(
@@ -18,7 +24,7 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
 
         ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(),
+                LocalDateTime.now(clock),
                 HttpStatus.NOT_FOUND.value(),
                 "Not Found",
                 ex.getMessage(),
@@ -34,7 +40,7 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
 
         ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(),
+                LocalDateTime.now(clock),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal Server Error",
                 "Une erreur interne est survenue.",
@@ -44,4 +50,3 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
-

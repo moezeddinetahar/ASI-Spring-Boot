@@ -15,6 +15,8 @@ import tn.esprit.autoloc.service.IAgenceSimulation;
 
 import java.util.List;
 
+// java:S4684 désactivée volontairement (étape 15) : les entités JPA servent de modèle d'échange
+@SuppressWarnings("java:S4684")
 @RestController
 @RequestMapping("/agences")
 @RequiredArgsConstructor
