@@ -13,6 +13,8 @@ import tn.esprit.autoloc.service.IContratService;
 
 import java.util.List;
 
+// java:S4684 : les entités JPA servent volontairement de modèle d'échange dans cet atelier
+@SuppressWarnings("java:S4684")
 @RestController
 @RequestMapping("/contrats")
 @RequiredArgsConstructor
