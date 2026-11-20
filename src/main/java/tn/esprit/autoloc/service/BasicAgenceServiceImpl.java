@@ -3,7 +3,6 @@ package tn.esprit.autoloc.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tn.esprit.autoloc.Utils;
-import tn.esprit.autoloc.calcul.VehiculeOffre;
 import tn.esprit.autoloc.domain.Agence;
 import tn.esprit.autoloc.exception.ResourceNotFoundException;
 import tn.esprit.autoloc.repository.IAgenceRepository;
@@ -13,7 +12,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class BasicAgenceServiceImpl implements IAgenceService {
-    private final IAgenceRepository Repository;
+    private final IAgenceRepository repository;
 
     @Override
     public boolean check(Agence agence, boolean isNew) {
@@ -28,16 +27,16 @@ public class BasicAgenceServiceImpl implements IAgenceService {
         if(!check(agence,true)){
             throw new IllegalArgumentException("champs obligatoires !!!");
         }
-        return Repository.save(agence);
+        return repository.save(agence);
     }
 
     @Override
     public Agence findById(Long id) {
-        return Repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Agence",id.toString()));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Agence",id.toString()));
     }
 
     public List<Agence> findAll() {
-        return Repository.findAll();
+        return repository.findAll();
     }
 
     @Override
@@ -53,15 +52,15 @@ public class BasicAgenceServiceImpl implements IAgenceService {
         existante.setAdresse(agence.getAdresse());
         existante.setVille(agence.getVille());
 
-        return Repository.save(existante);
+        return repository.save(existante);
     }
 
     @Override
     public void deleteById(Long id) {
-        if (!Repository.existsById(id)) {
+        if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Agence", id.toString());
         }
-        Repository.deleteById(id);
+        repository.deleteById(id);
     }
 
     @Override

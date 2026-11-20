@@ -1,21 +1,19 @@
 package tn.esprit.autoloc.service;
 
 import org.springframework.data.repository.CrudRepository;
-import tn.esprit.autoloc.calcul.VehiculeOffre;
-import tn.esprit.autoloc.domain.Agence;
 import tn.esprit.autoloc.exception.ResourceNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class GenericServiceImpl<T, ID> implements IGenericService<T, ID> {
+public abstract class GenericServiceImpl<T, I> implements IGenericService<T, I> {
     protected abstract String getEntityName();
-    protected abstract ID getId(T entity);
+    protected abstract I getId(T entity);
     protected abstract void setFields(T source, T target);
 
-    protected final CrudRepository<T, ID> repository;
+    protected final CrudRepository<T, I> repository;
 
-    protected GenericServiceImpl(CrudRepository<T, ID> repository) {
+    protected GenericServiceImpl(CrudRepository<T, I> repository) {
         this.repository = repository;
     }
 
@@ -32,7 +30,7 @@ public abstract class GenericServiceImpl<T, ID> implements IGenericService<T, ID
     }
 
     @Override
-    public T findById(ID id) {
+    public T findById(I id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(getEntityName(), id.toString()));
     }
@@ -45,7 +43,7 @@ public abstract class GenericServiceImpl<T, ID> implements IGenericService<T, ID
     }
 
     @Override
-    public T update(ID id, T entity) {
+    public T update(I id, T entity) {
         // 1. Récupère l'entité existante (exception si introuvable)
         T existante = findById(id);
 
@@ -60,7 +58,7 @@ public abstract class GenericServiceImpl<T, ID> implements IGenericService<T, ID
     }
 
     @Override
-    public void deleteById(ID id) {
+    public void deleteById(I id) {
         // existsById : on ne charge pas les données
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException(getEntityName(), id.toString());

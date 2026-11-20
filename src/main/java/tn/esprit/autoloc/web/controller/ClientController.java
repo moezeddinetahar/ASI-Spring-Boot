@@ -4,7 +4,6 @@ package tn.esprit.autoloc.web.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,10 +28,8 @@ public class ClientController {
     }
 
     @Operation(summary = "Consulter un client")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Client trouvé"),
-            @ApiResponse(responseCode = "404", description = "Client introuvable")
-    })
+    @ApiResponse(responseCode = "200", description = "Client trouvé")
+    @ApiResponse(responseCode = "404", description = "Client introuvable")
     @GetMapping("/{id}")
     public Client findById(
             @Parameter(description = "Identifiant")

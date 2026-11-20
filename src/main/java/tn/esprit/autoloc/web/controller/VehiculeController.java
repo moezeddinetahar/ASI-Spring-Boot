@@ -3,7 +3,6 @@ package tn.esprit.autoloc.web.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,8 +25,8 @@ public class VehiculeController {
     public List<Vehicule> findAll() { return service.findAll(); }
 
     @Operation(summary = "Consulter un véhicule")
-    @ApiResponses({@ApiResponse(responseCode = "200", description = "Véhicule trouvé"),
-            @ApiResponse(responseCode = "404", description = "Véhicule introuvable")})
+    @ApiResponse(responseCode = "200", description = "Véhicule trouvé")
+    @ApiResponse(responseCode = "404", description = "Véhicule introuvable")
     @GetMapping("/{id}")
     public Vehicule findById(@Parameter(description = "Identifiant") @PathVariable Long id) {
         return service.findById(id);

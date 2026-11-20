@@ -21,7 +21,6 @@ import tn.esprit.autoloc.service.IAgenceService;
 import java.math.BigDecimal;
 import java.util.Set;
 
-import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
